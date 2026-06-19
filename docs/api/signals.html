@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signals · neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html">API index</a>
+            <a href="globals.html">Globals</a>
+            <a href="types.html">Types</a>
+            <a href="instance.html">Instance</a>
+            <a href="drawing.html">Drawing</a>
+            <a href="gctab.html">gctab</a>
+            <a href="signals.html" class="active">Signals</a>
+            <a href="raknet.html">raknet</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <a href="index.html">api</a>
+            <span class="sep">/</span>
+            <span>signals</span>
+        </div>
+
+        <h1>Signals</h1>
+        <p class="summary">RBXScriptSignal and RBXScriptConnection. Connect callbacks to game ticks, instance events, and input.</p>
+
+        <div class="tag-row">
+            <span class="tag module"><span class="dot"></span>module</span>
+        </div>
+
+        <h2 id="basics">Basics</h2>
+        <p>Every signal exposes <code>Connect</code> and <code>Once</code>. Both return an <code>RBXScriptConnection</code> with a <code>Connected</code> field and a <code>Disconnect</code> method.</p>
+        <div class="signature">signal:<span class="name">Connect</span>(<span class="arg">callback</span>: <span class="ret">function</span>) <span class="ret">→ RBXScriptConnection</span>
+signal:<span class="name">Once</span>(<span class="arg">callback</span>: <span class="ret">function</span>) <span class="ret">→ RBXScriptConnection</span>
+conn.<span class="name">Connected</span> <span class="ret">→ boolean</span>
+conn:<span class="name">Disconnect</span>() <span class="ret">→ ()</span></div>
+
+        <h2 id="globals">Run-loop signals</h2>
+        <p>Always reachable, no instance lookup needed. Each callback receives the delta time in seconds since the previous tick.</p>
+        <div class="signature">RunService.<span class="name">Heartbeat</span>:Connect(function(<span class="arg">dt</span>) end)
+RunService.<span class="name">PostSimulation</span>:Connect(function(<span class="arg">dt</span>) end)
+RunService.<span class="name">Stepped</span>:Connect(function(<span class="arg">dt</span>) end)
+RunService.<span class="name">PreSimulation</span>:Connect(function(<span class="arg">dt</span>) end)
+RunService.<span class="name">RenderStepped</span>:Connect(function(<span class="arg">dt</span>) end)
+RunService.<span class="name">PreRender</span>:Connect(function(<span class="arg">dt</span>) end)</div>
+
+        <p><code>Heartbeat</code> and <code>PostSimulation</code> are aliases for the same source. <code>Stepped</code> and <code>PreSimulation</code> are aliases. <code>RenderStepped</code> and <code>PreRender</code> are aliases.</p>
+
+        <h3>Example</h3>
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="lang">lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="ln">1</span><span class="tk-keyword">local</span> rs = game:<span class="tk-fn">GetService</span>(<span class="tk-string">"RunService"</span>)
+<span class="ln">2</span><span class="tk-keyword">local</span> n = <span class="tk-number">0</span>
+<span class="ln">3</span><span class="tk-keyword">local</span> conn = rs.Heartbeat:<span class="tk-fn">Connect</span>(<span class="tk-keyword">function</span>(dt)
+<span class="ln">4</span>    n = n + <span class="tk-number">1</span>
+<span class="ln">5</span>    <span class="tk-keyword">if</span> n &gt;= <span class="tk-number">120</span> <span class="tk-keyword">then</span> conn:<span class="tk-fn">Disconnect</span>() <span class="tk-keyword">end</span>
+<span class="ln">6</span><span class="tk-keyword">end</span>)</pre>
+        </div>
+
+        <h2 id="instance-events">Instance events</h2>
+        <p>Indexing an event name on any instance returns a dynamic <code>RBXScriptSignal</code>. The signal is polled each heartbeat against a baseline taken at first <code>Connect</code>.</p>
+        <div class="signature">inst.<span class="name">ChildAdded</span>:Connect(function(<span class="arg">child</span>) end)
+inst.<span class="name">ChildRemoved</span>:Connect(function(<span class="arg">child</span>) end)
+inst.<span class="name">DescendantAdded</span>:Connect(function(<span class="arg">child</span>) end)
+inst.<span class="name">DescendantRemoving</span>:Connect(function(<span class="arg">child</span>) end)
+inst.<span class="name">AncestryChanged</span>:Connect(function(<span class="arg">self</span>, <span class="arg">parent</span>) end)
+basepart.<span class="name">Touched</span>:Connect(function(<span class="arg">other</span>) end)
+basepart.<span class="name">TouchEnded</span>:Connect(function(<span class="arg">other</span>) end)
+humanoid.<span class="name">StateChanged</span>:Connect(function(<span class="arg">old</span>, <span class="arg">new</span>) end)
+humanoid.<span class="name">Died</span>:Connect(function() end)</div>
+
+        <p><code>Touched</code> and <code>TouchEnded</code> are AABB-overlap polled. They will not match physics-engine touches that resolve to non-overlapping geometry.</p>
+
+        <h2 id="input">Input service signals</h2>
+        <p>Backed by the live UserInputService hook so the latency matches the host. The input table mirrors the standard <code>InputObject</code> shape.</p>
+        <div class="signature">UserInputService.<span class="name">InputBegan</span>:Connect(function(<span class="arg">input</span>, <span class="arg">processed</span>) end)
+UserInputService.<span class="name">InputEnded</span>:Connect(function(<span class="arg">input</span>, <span class="arg">processed</span>) end)
+UserInputService.<span class="name">InputChanged</span>:Connect(function(<span class="arg">input</span>, <span class="arg">processed</span>) end)</div>
+
+        <h3>Example</h3>
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="lang">lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="ln">1</span><span class="tk-keyword">local</span> uis = game:<span class="tk-fn">GetService</span>(<span class="tk-string">"UserInputService"</span>)
+<span class="ln">2</span>uis.InputBegan:<span class="tk-fn">Connect</span>(<span class="tk-keyword">function</span>(input, processed)
+<span class="ln">3</span>    <span class="tk-keyword">if</span> processed <span class="tk-keyword">then</span> <span class="tk-keyword">return</span> <span class="tk-keyword">end</span>
+<span class="ln">4</span>    <span class="tk-keyword">if</span> input.KeyCode == Enum.KeyCode.E <span class="tk-keyword">then</span>
+<span class="ln">5</span>        <span class="tk-fn">print</span>(<span class="tk-string">"E pressed"</span>)
+<span class="ln">6</span>    <span class="tk-keyword">end</span>
+<span class="ln">7</span><span class="tk-keyword">end</span>)</pre>
+        </div>
+
+        <h2 id="connection">RBXScriptConnection</h2>
+        <p>The handle returned by <code>Connect</code> and <code>Once</code>. Holding a connection alive holds the registered callback alive too. Calling <code>Disconnect</code> drops both.</p>
+        <div class="signature">conn.<span class="name">Connected</span>      <span class="ret">→ boolean</span>
+conn:<span class="name">Disconnect</span>()  <span class="ret">→ ()</span>
+conn:<span class="name">disconnect</span>()  <span class="ret">→ ()</span></div>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="gctab.html">
+                <span class="label">← Previous</span>
+                <span class="title">gctab</span>
+            </a>
+            <a class="foot-link next" href="raknet.html">
+                <span class="label">Next →</span>
+                <span class="title">raknet</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#basics">Basics</a></li>
+            <li><a href="#globals">Run-loop signals</a></li>
+            <li><a href="#instance-events">Instance events</a></li>
+            <li><a href="#input">Input service signals</a></li>
+            <li><a href="#connection">RBXScriptConnection</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

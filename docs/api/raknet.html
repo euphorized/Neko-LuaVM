@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>raknet · neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html">API index</a>
+            <a href="globals.html">Globals</a>
+            <a href="types.html">Types</a>
+            <a href="instance.html">Instance</a>
+            <a href="drawing.html">Drawing</a>
+            <a href="gctab.html">gctab</a>
+            <a href="signals.html">Signals</a>
+            <a href="raknet.html" class="active">raknet</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <a href="index.html">api</a>
+            <span class="sep">/</span>
+            <span>raknet</span>
+        </div>
+
+        <h1>raknet</h1>
+        <p class="summary">Wire-level packet hooks. Inspect, mutate, drop, or replace traffic before the host transport sees it.</p>
+
+        <div class="tag-row">
+            <span class="tag module"><span class="dot"></span>module</span>
+        </div>
+
+        <h2 id="hooks">Hooks</h2>
+        <p>Send hooks fire just before each outgoing packet is handed to the transport. Recv hooks fire just after each incoming packet is parsed and before the game observes it.</p>
+        <div class="signature">raknet.<span class="name">add_send_hook</span>(<span class="arg">callback</span>: <span class="ret">function(Packet)</span>) <span class="ret">→ ()</span>
+raknet.<span class="name">add_recv_hook</span>(<span class="arg">callback</span>: <span class="ret">function(Packet)</span>) <span class="ret">→ ()</span>
+raknet.<span class="name">clear_send_hooks</span>() <span class="ret">→ ()</span>
+raknet.<span class="name">clear_recv_hooks</span>() <span class="ret">→ ()</span></div>
+
+        <p>Multiple hooks can be registered. They run in registration order, each receiving the same <code>Packet</code> userdata. Mutations made by one hook are visible to the next.</p>
+
+        <h2 id="packet">Packet</h2>
+        <p>The userdata passed to hook callbacks. Lives only for the duration of the call.</p>
+        <div class="signature">packet.<span class="name">PacketId</span>  <span class="ret">→ number</span>
+packet.<span class="name">Buffer</span>    <span class="ret">→ buffer</span>
+packet.<span class="name">AsBuffer</span>  <span class="ret">→ buffer</span>
+packet.<span class="name">Size</span>      <span class="ret">→ number</span>
+packet.<span class="name">Length</span>    <span class="ret">→ number</span>
+packet:<span class="name">SetData</span>(<span class="arg">buf</span>: <span class="ret">buffer</span>) <span class="ret">→ ()</span>
+packet:<span class="name">SetPacketId</span>(<span class="arg">id</span>: <span class="ret">number</span>) <span class="ret">→ ()</span></div>
+
+        <p><code>Buffer</code> and <code>AsBuffer</code> are aliases. <code>Size</code> and <code>Length</code> are aliases. Reading <code>Buffer</code> returns a fresh copy each time, mutating that copy does not affect the in-flight packet, call <code>SetData</code> to commit changes back.</p>
+
+        <h2 id="example">Example</h2>
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="lang">lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="ln">1</span><span class="tk-comment">-- log every outgoing packet</span>
+<span class="ln">2</span>raknet.<span class="tk-fn">add_send_hook</span>(<span class="tk-keyword">function</span>(p)
+<span class="ln">3</span>    <span class="tk-fn">print</span>(<span class="tk-fn">string.format</span>(<span class="tk-string">"send id=%d size=%d"</span>, p.PacketId, p.Size))
+<span class="ln">4</span><span class="tk-keyword">end</span>)
+<span class="ln">5</span>
+<span class="ln">6</span><span class="tk-comment">-- rewrite the first byte of one specific opcode</span>
+<span class="ln">7</span>raknet.<span class="tk-fn">add_send_hook</span>(<span class="tk-keyword">function</span>(p)
+<span class="ln">8</span>    <span class="tk-keyword">if</span> p.PacketId ~= <span class="tk-number">0x83</span> <span class="tk-keyword">then</span> <span class="tk-keyword">return</span> <span class="tk-keyword">end</span>
+<span class="ln">9</span>    <span class="tk-keyword">local</span> b = p.Buffer
+<span class="ln">10</span>    <span class="tk-fn">buffer.writeu8</span>(b, <span class="tk-number">0</span>, <span class="tk-number">0xFF</span>)
+<span class="ln">11</span>    p:<span class="tk-fn">SetData</span>(b)
+<span class="ln">12</span><span class="tk-keyword">end</span>)</pre>
+        </div>
+
+        <h2 id="lifecycle">Lifecycle</h2>
+        <p>Hooks survive script reruns until <code>clear_send_hooks</code> or <code>clear_recv_hooks</code> is called, or the VM is reinitialised. Be deliberate about deregistration, an orphaned hook can starve the dispatcher and stall the game's network thread under heavy traffic.</p>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="signals.html">
+                <span class="label">← Previous</span>
+                <span class="title">Signals</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#hooks">Hooks</a></li>
+            <li><a href="#packet">Packet</a></li>
+            <li><a href="#example">Example</a></li>
+            <li><a href="#lifecycle">Lifecycle</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>
