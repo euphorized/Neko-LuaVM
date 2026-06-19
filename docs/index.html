@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation · neko</title>
+<link rel="icon" type="image/svg+xml" href="../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/docs.css">
+<script>window.__BASE__ = '../';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../index.html">
+            <img class="mark" src="../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="index.html" class="active">Docs</a>
+            <a href="api/index.html">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="index.html" class="active">Overview</a>            <a href="quickstart.html">Quickstart</a>
+            <a href="concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="api/index.html">API index</a>
+            <a href="api/globals.html">Globals</a>
+            <a href="api/types.html">Types</a>
+            <a href="api/instance.html">Instance</a>
+            <a href="api/drawing.html">Drawing</a>
+            <a href="api/gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../index.html">neko</a>
+            <span class="sep">/</span>
+            <span>docs</span>
+        </div>
+
+        <h1>Documentation</h1>
+        <p class="summary">neko is an embeddable Luau VM. It runs in its own process. The host is read and written through a kernel-mediated memory bridge.</p>
+
+        <h2 id="start">Start here</h2>
+
+        <div class="cards">
+            <a class="card" href="quickstart.html">
+                <div class="ic"><i data-lucide="play"></i></div>
+                <div class="title">Quickstart</div>
+                <div class="body">Run your first script. Walk the heap. Patch a value. Draw a box.</div>
+                <span class="arrow">read more →</span>
+            </a>
+            <a class="card" href="concepts.html">
+                <div class="ic"><i data-lucide="layout-grid"></i></div>
+                <div class="title">Architecture</div>
+                <div class="body">How the VM, the host, and the kernel bridge fit together.</div>
+                <span class="arrow">read more →</span>
+            </a>
+            <a class="card" href="api/index.html">
+                <div class="ic"><i data-lucide="book-open"></i></div>
+                <div class="title">API reference</div>
+                <div class="body">Every global, library, and type exposed to scripts.</div>
+                <span class="arrow">read more →</span>
+            </a>
+        </div>
+
+        <h2 id="api">API surface</h2>
+        <p>Every module is reachable from a vanilla Luau script through globals or library tables. There is no hidden state, no implicit context, no metaprogramming layer between the script and the engine.</p>
+
+        <div class="api-list">
+            <a href="api/globals.html">
+                <code>globals</code>
+                <span class="desc">print, warn, typeof, tick, task scheduler, clipboard, world-to-screen.</span>
+                <span class="kind-tag">core</span>
+            </a>
+            <a href="api/types.html">
+                <code>types</code>
+                <span class="desc">Vector3, Vector2, CFrame, Color3, UDim, UDim2, NumberRange, Rect.</span>
+                <span class="kind-tag">core</span>
+            </a>
+            <a href="api/instance.html">
+                <code>Instance</code>
+                <span class="desc">Live tree access. FindFirstChild, GetChildren, GetService, IsA.</span>
+                <span class="kind-tag">module</span>
+            </a>
+            <a href="api/drawing.html">
+                <code>Drawing</code>
+                <span class="desc">Persistent shapes drawn on the host's swap chain.</span>
+                <span class="kind-tag">module</span>
+            </a>
+            <a href="api/gctab.html">
+                <code>gctab</code>
+                <span class="desc">Find live tables by key name. Mutate value slots in place.</span>
+                <span class="kind-tag">module</span>
+            </a>
+        </div>
+
+        <h2 id="philosophy">Philosophy</h2>
+
+        <p><strong>Boring under load.</strong> The VM never crashes the host. Every cross-process read is bounded, validated, and recoverable. Stale references degrade silently rather than fault.</p>
+
+        <p><strong>Self-describing surface.</strong> If you can call it from Lua, you can read its source. <code>typeof(x)</code> tells you what you have.</p>
+
+        <p><strong>Symmetry between read and write.</strong> Anything you can observe through <code>getgc</code> or instance reflection, you can mutate through the same primitives. Validation rules are identical in both directions.</p>
+
+        <div class="callout">
+            <i data-lucide="info"></i>
+            <div class="body">
+                <div class="title">External by design</div>
+                <p>This runtime executes in a separate process from the host. Pointers returned from <code>getgc</code> identify host-side objects. They cannot be dereferenced as Luau values inside the VM.</p>
+            </div>
+        </div>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="../index.html">
+                <span class="label">← Home</span>
+                <span class="title">neko</span>
+            </a>
+            <a class="foot-link next" href="quickstart.html">
+                <span class="label">Next →</span>
+                <span class="title">Quickstart</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#start">Start here</a></li>
+            <li><a href="#api">API surface</a></li>
+            <li><a href="#philosophy">Philosophy</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

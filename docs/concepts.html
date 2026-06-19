@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture — neko</title>
+<link rel="icon" type="image/svg+xml" href="../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/docs.css">
+<script>window.__BASE__ = '../';</script>
+<script src="../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../index.html">
+            <img class="mark" src="../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="index.html" class="active">Docs</a>
+            <a href="api/index.html">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="index.html">Overview</a>            <a href="quickstart.html">Quickstart</a>
+            <a href="concepts.html" class="active">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="api/index.html">API index</a>
+            <a href="api/globals.html">Globals</a>
+            <a href="api/types.html">Types</a>
+            <a href="api/instance.html">Instance</a>
+            <a href="api/drawing.html">Drawing</a>
+            <a href="api/gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="index.html">docs</a>
+            <span class="sep">/</span>
+            <span>architecture</span>
+        </div>
+
+        <h1>Architecture</h1>
+        <p class="summary">neko runs in its own process. The host process — typically a game — runs untouched. The bridge between them is a kernel-level memory channel that the runtime treats as a memory bus.</p>
+
+        <h2 id="layers">Layers</h2>
+        <p>Every interaction with the host goes through three layers, top to bottom:</p>
+
+        <ol>
+            <li><strong>Lua VM</strong> — a stock Luau VM (compiler + interpreter, statically linked) running script code in the runtime's process.</li>
+            <li><strong>Host bridge</strong> — typed read/write helpers that translate Luau objects (Instance, Vector3, etc.) into host-side memory operations.</li>
+            <li><strong>Memory channel</strong> — a kernel-mediated transport that performs RPM/WPM against the host with bounded latency.</li>
+        </ol>
+
+        <p>Scripts only see the top layer. Everything below is invisible from Luau and unreachable from the host.</p>
+
+        <h2 id="state">State resolution</h2>
+        <p>The host's <code>lua_State</code> isn't a pointer the runtime knows ahead of time — it has to be resolved every session. The resolver walks the host's <code>ScriptContext</code>, decodes a XOR-obfuscated pointer, and validates the result through three independent shape checks before caching.</p>
+
+        <p>Once cached, every <code>getgc</code> and <code>gctab</code> call reuses the resolved state. If the host re-creates its state during a server transition, the resolver is invalidated and re-runs lazily on the next call.</p>
+
+        <h2 id="memory">Memory model</h2>
+        <p>All host-side reads and writes are proxied through the memory channel. There is no shared address space.</p>
+
+        <p>Pointers returned from the runtime (e.g. the <code>address</code> field of a <code>getgc</code> record) are valid in the host's address space, not the runtime's. They're returned as hex strings to make this visible at the API surface — accidentally dereferencing one as a Luau value is a type error, not a crash.</p>
+
+        <table class="params">
+            <tr>
+                <th>Operation</th>
+                <th>Mode</th>
+                <th>Notes</th>
+            </tr>
+            <tr>
+                <td><code>read&lt;T&gt;</code></td>
+                <td>RPM</td>
+                <td>Single typed read. Returns zero-initialized T on failure.</td>
+            </tr>
+            <tr>
+                <td><code>rpm</code></td>
+                <td>RPM</td>
+                <td>Bulk read into a buffer. Used for batched page walks.</td>
+            </tr>
+            <tr>
+                <td><code>wpm</code></td>
+                <td>WPM</td>
+                <td>Bulk write. Returns false on partial writes.</td>
+            </tr>
+            <tr>
+                <td><code>is_valid</code></td>
+                <td>Probe</td>
+                <td>Cheap address-range check. No actual read.</td>
+            </tr>
+        </table>
+
+        <h2 id="threads">Threading</h2>
+        <p>The VM runs on a dedicated worker thread. Scripts execute synchronously on that thread. <code>task.spawn</code> queues a new closure on the same thread; it does not start an OS thread.</p>
+
+        <p>Drawing is rendered on the runtime's own swap chain in its overlay window, not in the host. Any draw call from a script is a buffered command that flushes during the next overlay frame — no cross-process drawing.</p>
+
+        <h2 id="lifetimes">Lifetimes</h2>
+        <p>Scripts can be re-run any number of times during a session. Between runs, the VM tears down all instance caches, signal connections, drawings, and tween bindings. Globals you defined in a previous run are gone.</p>
+
+        <p>What survives:</p>
+        <ul>
+            <li>The Luau state itself (held by the runtime, not the script).</li>
+            <li>Drawings created in a previous run if you didn't call <code>:Remove()</code>. They render until the runtime exits.</li>
+            <li>The cached lookup of the host's lua_State.</li>
+        </ul>
+
+        <h2 id="failure">Failure modes</h2>
+        <p>Three things can go wrong, in order of severity:</p>
+
+        <p><strong>Stale pointer.</strong> A <code>getgc</code> address is valid at the moment of the call but freed before you write to it. The write either lands harmlessly in another GC object or fails the <code>is_valid</code> check. Detect this by re-running <code>gctab.refresh</code> and checking that the slot still matches the cached interned string.</p>
+
+        <p><strong>Resolver miss.</strong> The host's lua_State can't be located — usually because the host hasn't finished spinning up its scripting context. The runtime returns nil from <code>getgc_state</code>; scripts should treat this as "host not ready" and back off.</p>
+
+        <p><strong>Channel disconnect.</strong> The kernel bridge drops. All reads return zero, all writes return false. The runtime continues to accept scripts but they will produce empty results until the channel reattaches.</p>
+
+        <div class="callout warn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div class="body">
+                <div class="title">No assertions about host integrity.</div>
+                <p>The runtime never assumes that a value at a given offset is what it expects. Every read is followed by a structural validation pass. Mutations refuse to land on slots that no longer hold the expected type.</p>
+            </div>
+        </div>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="quickstart.html">
+                <span class="label">← Previous</span>
+                <span class="title">Quickstart</span>
+            </a>
+            <a class="foot-link next" href="api/index.html">
+                <span class="label">Next →</span>
+                <span class="title">API reference</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#layers">Layers</a></li>
+            <li><a href="#state">State resolution</a></li>
+            <li><a href="#memory">Memory model</a></li>
+            <li><a href="#threads">Threading</a></li>
+            <li><a href="#lifetimes">Lifetimes</a></li>
+            <li><a href="#failure">Failure modes</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

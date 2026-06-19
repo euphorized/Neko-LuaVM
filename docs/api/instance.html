@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instance · neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html">API index</a>
+            <a href="globals.html">Globals</a>
+            <a href="types.html">Types</a>
+            <a href="instance.html" class="active">Instance</a>
+            <a href="drawing.html">Drawing</a>
+            <a href="gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <a href="index.html">api</a>
+            <span class="sep">/</span>
+            <span>instance</span>
+        </div>
+
+        <h1>Instance</h1>
+        <p class="summary">Live tree access. Backed by direct memory reads against the host's instance graph.</p>
+
+        <div class="tag-row">
+            <span class="tag module"><span class="dot"></span>module</span>
+        </div>
+
+        <h2 id="new">Instance.new</h2>
+        <p>Constructs a new instance of the given class. The handle is returned immediately. Property writes are queued and committed when the instance gets a parent.</p>
+        <div class="signature">Instance.<span class="name">new</span>(<span class="arg">className</span>: <span class="ret">string</span>) <span class="ret">→ Instance</span></div>
+
+        <h3>Example</h3>
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="lang">lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="ln">1</span><span class="tk-keyword">local</span> p = Instance.<span class="tk-fn">new</span>(<span class="tk-string">"Part"</span>)
+<span class="ln">2</span>p.Name        = <span class="tk-string">"marker"</span>
+<span class="ln">3</span>p.Anchored    = <span class="tk-keyword">true</span>
+<span class="ln">4</span>p.Color       = Color3.<span class="tk-fn">fromRGB</span>(<span class="tk-number">255</span>, <span class="tk-number">111</span>, <span class="tk-number">177</span>)
+<span class="ln">5</span>p.Size        = Vector3.<span class="tk-fn">new</span>(<span class="tk-number">2</span>, <span class="tk-number">2</span>, <span class="tk-number">2</span>)
+<span class="ln">6</span>p.Parent      = workspace</pre>
+        </div>
+
+        <h2 id="services">Services</h2>
+        <p>Top-level services live under <code>game</code>. Always resolve them through <code>GetService</code> rather than <code>FindFirstChild</code>.</p>
+        <div class="signature">game:<span class="name">GetService</span>(<span class="arg">name</span>: <span class="ret">string</span>) <span class="ret">→ Instance</span>
+game:<span class="name">FindService</span>(<span class="arg">name</span>: <span class="ret">string</span>) <span class="ret">→ Instance?</span></div>
+
+        <h2 id="traversal">Traversal</h2>
+        <p>All standard tree walkers are present.</p>
+        <div class="signature">inst:<span class="name">FindFirstChild</span>(<span class="arg">name</span>: <span class="ret">string</span>) <span class="ret">→ Instance?</span>
+inst:<span class="name">WaitForChild</span>(<span class="arg">name</span>: <span class="ret">string</span>) <span class="ret">→ Instance</span>
+inst:<span class="name">FindFirstChildOfClass</span>(<span class="arg">class</span>: <span class="ret">string</span>) <span class="ret">→ Instance?</span>
+inst:<span class="name">FindFirstChildWhichIsA</span>(<span class="arg">class</span>: <span class="ret">string</span>) <span class="ret">→ Instance?</span>
+inst:<span class="name">FindFirstAncestor</span>(<span class="arg">name</span>: <span class="ret">string</span>) <span class="ret">→ Instance?</span>
+inst:<span class="name">GetChildren</span>() <span class="ret">→ { Instance }</span>
+inst:<span class="name">GetDescendants</span>() <span class="ret">→ { Instance }</span></div>
+
+        <h2 id="identity">Identity</h2>
+        <div class="signature">inst:<span class="name">IsA</span>(<span class="arg">class</span>: <span class="ret">string</span>) <span class="ret">→ boolean</span>
+inst:<span class="name">GetFullName</span>() <span class="ret">→ string</span></div>
+
+        <h2 id="lifetime">Lifetime</h2>
+        <div class="signature">inst:<span class="name">Clone</span>() <span class="ret">→ Instance</span>
+inst:<span class="name">Destroy</span>() <span class="ret">→ ()</span>
+inst:<span class="name">Remove</span>() <span class="ret">→ ()</span></div>
+
+        <p><code>Destroy</code> and <code>Remove</code> are aliased and behave identically: parents the instance to <code>nil</code> and locks the parent property.</p>
+
+        <h2 id="players">Players service</h2>
+        <p>The <code>Players</code> service exposes the standard roster.</p>
+        <div class="signature">Players:<span class="name">GetPlayers</span>() <span class="ret">→ { Player }</span>
+Players.LocalPlayer <span class="ret">→ Player</span></div>
+
+        <h2 id="http">HttpGet</h2>
+        <p>Synchronous HTTP fetch. Returns the response body as a string. Throws on non-2xx.</p>
+        <div class="signature">inst:<span class="name">HttpGet</span>(<span class="arg">url</span>: <span class="ret">string</span>) <span class="ret">→ string</span>
+inst:<span class="name">HttpGetAsync</span>(<span class="arg">url</span>: <span class="ret">string</span>) <span class="ret">→ string</span></div>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="types.html">
+                <span class="label">← Previous</span>
+                <span class="title">Types</span>
+            </a>
+            <a class="foot-link next" href="drawing.html">
+                <span class="label">Next →</span>
+                <span class="title">Drawing</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#new">Instance.new</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#traversal">Traversal</a></li>
+            <li><a href="#identity">Identity</a></li>
+            <li><a href="#lifetime">Lifetime</a></li>
+            <li><a href="#players">Players service</a></li>
+            <li><a href="#http">HttpGet</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

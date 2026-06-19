@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gctab — neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html">API index</a>
+            <a href="globals.html">Globals</a>
+            <a href="types.html">Types</a>
+            <a href="instance.html">Instance</a>
+            <a href="drawing.html">Drawing</a>
+            <a href="gctab.html" class="active">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <a href="index.html">api</a>
+            <span class="sep">/</span>
+            <span>gctab</span>
+        </div>
+
+        <h1>gctab</h1>
+        <p class="summary">Locate live host tables that contain a given string key, then mutate the matching value slots in place. The lookup walks the host's interned string table once and caches addresses across calls.</p>
+
+        <div class="tag-row">
+            <span class="tag module"><span class="dot"></span>module</span>
+            <span class="tag global"><span class="dot"></span>stable</span>
+        </div>
+
+        <h2 id="overview">Overview</h2>
+        <p>The library exposes four functions and one opaque cache shape. The cache is a Lua table, but you should treat it as private — the structure may change between versions.</p>
+
+        <div class="signature">gctab.<span class="name">find</span>(<span class="arg">keys</span>) <span class="ret">→ cache</span>
+gctab.<span class="name">set</span>(<span class="arg">cache</span>, <span class="arg">key</span>, <span class="arg">value</span>) <span class="ret">→ number</span>
+gctab.<span class="name">set</span>(<span class="arg">cache</span>, <span class="arg">map</span>) <span class="ret">→ number</span>
+gctab.<span class="name">refresh</span>(<span class="arg">cache</span>) <span class="ret">→ number</span>
+gctab.<span class="name">dump</span>(<span class="arg">cache</span>) <span class="ret">→ ()</span></div>
+
+        <h2 id="find">find</h2>
+        <p>Walks the host's GC and resolves each requested string to its interned <code>TString*</code>. For every match, scans every live table on the heap for nodes keyed by that string, recording <code>(table, node)</code> tuples.</p>
+
+        <div class="signature">gctab.<span class="name">find</span>(<span class="arg">keys</span>: { <span class="ret">string</span> }) <span class="ret">→ cache</span></div>
+
+        <table class="params">
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>keys</td>
+                <td>{ string }</td>
+                <td>An array of key names to search for. Order is irrelevant.</td>
+            </tr>
+        </table>
+
+        <h3>Returns</h3>
+        <p>An opaque cache table with two fields:</p>
+
+        <table class="params">
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>strings</td>
+                <td>map</td>
+                <td>Resolved interned string addresses, keyed by name. Missing keys are absent.</td>
+            </tr>
+            <tr>
+                <td>hits</td>
+                <td>map</td>
+                <td>For each key, an array of <code>{ table, node, string }</code> hex addresses.</td>
+            </tr>
+        </table>
+
+        <h3>Example</h3>
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="frame-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    find.lua
+                </span>
+                <button class="copy-btn" aria-label="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="line"><span class="ln">1</span><span class="tk-keyword">local</span> cache = gctab.<span class="tk-fn">find</span>({ <span class="tk-string">"WalkSpeed"</span>, <span class="tk-string">"JumpHeight"</span> })</span>
+<span class="line"><span class="ln">2</span></span>
+<span class="line"><span class="ln">3</span><span class="tk-keyword">for</span> name, addr <span class="tk-keyword">in</span> <span class="tk-fn">pairs</span>(cache.strings) <span class="tk-keyword">do</span></span>
+<span class="line"><span class="ln">4</span>    <span class="tk-fn">print</span>(name, addr, #cache.hits[name], <span class="tk-string">"hits"</span>)</span>
+<span class="line"><span class="ln">5</span><span class="tk-keyword">end</span></span></pre>
+        </div>
+
+        <h2 id="set">set</h2>
+        <p>Writes a new value into every node tracked by the cache for the given key. Two forms — single key/value, or a map of multiple keys to values.</p>
+
+        <div class="signature">gctab.<span class="name">set</span>(<span class="arg">cache</span>: cache, <span class="arg">key</span>: <span class="ret">string</span>, <span class="arg">value</span>: <span class="ret">any</span>) <span class="ret">→ number</span>
+gctab.<span class="name">set</span>(<span class="arg">cache</span>: cache, <span class="arg">map</span>: { [<span class="ret">string</span>]: <span class="ret">any</span> }) <span class="ret">→ number</span></div>
+
+        <p>Writes are type-checked against the existing slot — only <code>number</code> and <code>boolean</code> slots accept rewrites. Anything else is skipped silently. The return value reports how many nodes were actually written.</p>
+
+        <table class="params">
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>cache</td>
+                <td>cache</td>
+                <td>A cache produced by <code>find</code>.</td>
+            </tr>
+            <tr>
+                <td>key / map</td>
+                <td>string / table</td>
+                <td>Either a single key name plus a value, or a map of names to values.</td>
+            </tr>
+        </table>
+
+        <h3>Returns</h3>
+        <p>Number of slots successfully written. Stale entries (slots whose key string no longer matches the cached pointer) are skipped without counting.</p>
+
+        <h3>Example</h3>
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="frame-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    set.lua
+                </span>
+                <button class="copy-btn" aria-label="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="line"><span class="ln">1</span><span class="tk-keyword">local</span> cache = gctab.<span class="tk-fn">find</span>({ <span class="tk-string">"WalkSpeed"</span>, <span class="tk-string">"JumpHeight"</span> })</span>
+<span class="line"><span class="ln">2</span></span>
+<span class="line"><span class="ln">3</span><span class="tk-keyword">local</span> n = gctab.<span class="tk-fn">set</span>(cache, {</span>
+<span class="line"><span class="ln">4</span>    WalkSpeed  = <span class="tk-number">100</span>,</span>
+<span class="line"><span class="ln">5</span>    JumpHeight = <span class="tk-number">200</span>,</span>
+<span class="line"><span class="ln">6</span>})</span>
+<span class="line"><span class="ln">7</span></span>
+<span class="line"><span class="ln">8</span>gctab.<span class="tk-fn">set</span>(cache, <span class="tk-string">"WalkSpeed"</span>, <span class="tk-number">75</span>)</span></pre>
+        </div>
+
+        <h2 id="refresh">refresh</h2>
+        <p>Re-walks the heap and rebuilds the cache in place. Use after a server transition, character respawn, or any event that may have invalidated previously located tables.</p>
+
+        <div class="signature">gctab.<span class="name">refresh</span>(<span class="arg">cache</span>: cache) <span class="ret">→ number</span></div>
+
+        <p>Returns the new total number of <code>(table, node)</code> hits. Strings that can no longer be resolved are dropped from the cache.</p>
+
+        <h2 id="dump">dump</h2>
+        <p>Prints a human-readable summary of the cache to the console. For diagnostics only — do not parse the output.</p>
+
+        <div class="signature">gctab.<span class="name">dump</span>(<span class="arg">cache</span>: cache) <span class="ret">→ ()</span></div>
+
+        <h2 id="notes">Notes</h2>
+        <p><strong>Scope.</strong> Many tables across the heap may share a key name — gun configs, UI state, server-mirror copies. <code>set</code> writes to every match. If you need finer control, iterate <code>cache.hits[name]</code> manually and use <a class="inline" href="#">setgc</a> on individual nodes.</p>
+
+        <p><strong>Cost.</strong> A <code>find</code> call walks every page and every node of every table in the heap. On a typical session that's ~10k tables × ~16 nodes — fast enough for occasional rebuilds but not for every frame.</p>
+
+        <p><strong>Stale safety.</strong> Each <code>set</code> revalidates the node's key tag and pointer before writing. A node that was a <code>WalkSpeed</code> slot at <code>find</code> time and is no longer one at <code>set</code> time is skipped without falling through to the wrong type.</p>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="drawing.html">
+                <span class="label">← Previous</span>
+                <span class="title">Drawing</span>
+            </a>
+            <a class="foot-link next" href="../../index.html">
+                <span class="label">Home →</span>
+                <span class="title">neko</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#find">find</a></li>
+            <li><a href="#set">set</a></li>
+            <li><a href="#refresh">refresh</a></li>
+            <li><a href="#dump">dump</a></li>
+            <li><a href="#notes">Notes</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

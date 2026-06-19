@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>neko</title>
+<meta name="description" content="An embeddable Luau virtual machine with first-class introspection.">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/css/main.css">
+<script>window.__BASE__ = './';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="index.html">
+            <img class="mark" src="assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="docs/index.html">Docs</a>
+            <a href="docs/api/index.html">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<section class="hero">
+    <div class="container inner">
+        <span class="eyebrow">v1.1 release</span>
+        <h1 class="display">Reach into a live process. <span class="accent">Read what's running. Write what isn't.</span></h1>
+        <p class="lede">neko embeds a Luau VM and exposes the host's heap, instances, and frame buffer to scripts.</p>
+        <div class="cta-row">
+            <a class="btn primary" href="docs/quickstart.html">
+                <span>Get started</span>
+                <span class="arrow">→</span>
+            </a>
+            <a class="btn ghost" href="https://github.com" target="_blank" rel="noopener">
+                <i data-lucide="github"></i>
+                <span>GitHub</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="head">
+            <span class="eyebrow">Primitives</span>
+            <h2>Three surfaces. No abstractions.</h2>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature spotlight-card">
+                <div class="ic"><i data-lucide="git-fork"></i></div>
+                <h3>Instances</h3>
+                <p>Resolve, traverse, and modify the live game tree from Lua. <code>FindFirstChild</code>, <code>GetChildren</code>, <code>GetService</code>, <code>IsA</code>.</p>
+                <a class="more" href="docs/api/instance.html">Reference <span class="arrow">→</span></a>
+            </div>
+
+            <div class="feature spotlight-card">
+                <div class="ic"><i data-lucide="square-dashed"></i></div>
+                <h3>Drawing</h3>
+                <p>Persistent shapes drawn on the host's swap chain. Six primitives: line, square, circle, text, triangle, quad.</p>
+                <a class="more" href="docs/api/drawing.html">Reference <span class="arrow">→</span></a>
+            </div>
+
+            <div class="feature spotlight-card">
+                <div class="ic"><i data-lucide="layers"></i></div>
+                <h3>Heap</h3>
+                <p>Walk the host's GC. Find tables that contain a given key. Mutate value slots in place.</p>
+                <a class="more" href="docs/api/gctab.html">Reference <span class="arrow">→</span></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="site">
+    <div class="container row">
+        <span class="copy">© neko · MIT</span>
+        <nav>
+            <a href="docs/index.html">Docs</a>
+            <a href="docs/api/index.html">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+    </div>
+</footer>
+
+</body>
+</html>

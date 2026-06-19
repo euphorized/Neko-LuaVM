@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drawing · neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html">API index</a>
+            <a href="globals.html">Globals</a>
+            <a href="types.html">Types</a>
+            <a href="instance.html">Instance</a>
+            <a href="drawing.html" class="active">Drawing</a>
+            <a href="gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <a href="index.html">api</a>
+            <span class="sep">/</span>
+            <span>drawing</span>
+        </div>
+
+        <h1>Drawing</h1>
+        <p class="summary">Persistent shapes drawn on the host's swap chain. Every shape is a handle. Mutate properties to update; call <code>:Remove()</code> to free.</p>
+
+        <div class="tag-row">
+            <span class="tag module"><span class="dot"></span>module</span>
+        </div>
+
+        <h2 id="new">Drawing.new</h2>
+        <p>Constructs a new shape of the given kind.</p>
+        <div class="signature">Drawing.<span class="name">new</span>(<span class="arg">kind</span>: <span class="ret">string</span>) <span class="ret">→ Drawing</span></div>
+
+        <table class="params">
+            <tr><th>Kind</th><th>Shape</th><th>Notes</th></tr>
+            <tr><td>Line</td><td>line segment</td><td>From / To, Thickness</td></tr>
+            <tr><td>Square</td><td>axis-aligned rect</td><td>Position, Size, Filled</td></tr>
+            <tr><td>Circle</td><td>circle</td><td>Position, Radius, NumSides, Filled</td></tr>
+            <tr><td>Text</td><td>label</td><td>Position, Text, Font, Size, Center</td></tr>
+            <tr><td>Triangle</td><td>three points</td><td>PointA, PointB, PointC, Filled</td></tr>
+            <tr><td>Quad</td><td>four points</td><td>PointA..D, Filled</td></tr>
+        </table>
+
+        <h2 id="props">Common properties</h2>
+        <table class="params">
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+            <tr><td>Visible</td><td>boolean</td><td>Shows or hides the shape.</td></tr>
+            <tr><td>ZIndex</td><td>number</td><td>Render order. Higher draws over lower.</td></tr>
+            <tr><td>Color</td><td>Color3</td><td>Fill or stroke color.</td></tr>
+            <tr><td>Transparency</td><td>number</td><td>0 opaque, 1 invisible.</td></tr>
+            <tr><td>Thickness</td><td>number</td><td>Stroke width when applicable.</td></tr>
+            <tr><td>Filled</td><td>boolean</td><td>Solid fill vs outline only.</td></tr>
+            <tr><td>Outline</td><td>boolean</td><td>Adds a contrasting outline.</td></tr>
+        </table>
+
+        <h2 id="example">Example</h2>
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="lang">lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="ln">1</span><span class="tk-keyword">local</span> dot = Drawing.<span class="tk-fn">new</span>(<span class="tk-string">"Circle"</span>)
+<span class="ln">2</span>dot.Position = Vector2.<span class="tk-fn">new</span>(<span class="tk-number">200</span>, <span class="tk-number">200</span>)
+<span class="ln">3</span>dot.Radius   = <span class="tk-number">3</span>
+<span class="ln">4</span>dot.Color    = Color3.<span class="tk-fn">fromRGB</span>(<span class="tk-number">255</span>, <span class="tk-number">111</span>, <span class="tk-number">177</span>)
+<span class="ln">5</span>dot.Filled   = <span class="tk-keyword">true</span>
+<span class="ln">6</span>dot.Visible  = <span class="tk-keyword">true</span></pre>
+        </div>
+
+        <h2 id="fonts">Fonts</h2>
+        <p>The <code>Drawing.Fonts</code> table maps font names to indices used by <code>Text</code> shapes.</p>
+        <table class="params">
+            <tr><th>Name</th><th>Index</th></tr>
+            <tr><td>UI</td><td>0</td></tr>
+            <tr><td>System</td><td>1</td></tr>
+            <tr><td>Plex</td><td>2</td></tr>
+            <tr><td>Monospace</td><td>3</td></tr>
+        </table>
+
+        <h2 id="lifecycle">Lifecycle</h2>
+        <p>Shapes persist across script runs unless you remove them. Always pair <code>Drawing.new</code> with a <code>:Remove()</code> in your teardown path.</p>
+        <div class="signature">drawing:<span class="name">Remove</span>() <span class="ret">→ ()</span></div>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="instance.html">
+                <span class="label">← Previous</span>
+                <span class="title">Instance</span>
+            </a>
+            <a class="foot-link next" href="gctab.html">
+                <span class="label">Next →</span>
+                <span class="title">gctab</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#new">Drawing.new</a></li>
+            <li><a href="#props">Common properties</a></li>
+            <li><a href="#example">Example</a></li>
+            <li><a href="#fonts">Fonts</a></li>
+            <li><a href="#lifecycle">Lifecycle</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

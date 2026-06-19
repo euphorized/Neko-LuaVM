@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Globals — neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html">API index</a>
+            <a href="globals.html" class="active">Globals</a>
+            <a href="types.html">Types</a>
+            <a href="instance.html">Instance</a>
+            <a href="drawing.html">Drawing</a>
+            <a href="gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <a href="index.html">api</a>
+            <span class="sep">/</span>
+            <span>globals</span>
+        </div>
+
+        <h1>Globals</h1>
+        <p class="summary">Top-level functions visible from any script. Mostly Roblox-compatible — <code>print</code>, <code>typeof</code>, <code>task</code> behave the way scripts expect — with a few extras for working with the host.</p>
+
+        <div class="tag-row">
+            <span class="tag global"><span class="dot"></span>global</span>
+        </div>
+
+        <h2 id="io">I/O</h2>
+
+        <h3 id="print">print(...)</h3>
+        <p>Forwards all arguments to the runtime console. Tab-separated, newline-terminated, no formatting.</p>
+
+        <div class="signature"><span class="name">print</span>(<span class="arg">...</span>: <span class="ret">any</span>) <span class="ret">→ ()</span></div>
+
+        <h3>warn(...)</h3>
+        <p>Same as <code>print</code> but renders the line in the warning color.</p>
+
+        <h3 id="clipboard">setclipboard(s) / toclipboard(s)</h3>
+        <p>Replaces the system clipboard contents with the given string. Returns <code>true</code> on success.</p>
+
+        <div class="signature"><span class="name">setclipboard</span>(<span class="arg">text</span>: <span class="ret">string</span>) <span class="ret">→ boolean</span></div>
+
+        <h2 id="time">Time and tasks</h2>
+
+        <h3 id="tick">tick()</h3>
+        <p>Seconds since process start, monotonic, double-precision.</p>
+
+        <div class="signature"><span class="name">tick</span>() <span class="ret">→ number</span></div>
+
+        <h3>wait(seconds)</h3>
+        <p>Suspends the current Lua thread for at least <code>seconds</code>. The runtime continues to pump the host bridge during the wait — drawings keep rendering, signals keep firing.</p>
+
+        <div class="signature"><span class="name">wait</span>(<span class="arg">seconds</span>: <span class="ret">number</span>?) <span class="ret">→ number</span></div>
+
+        <p>Returns the actual elapsed time. The minimum resolution is roughly one frame.</p>
+
+        <h3 id="task">task</h3>
+        <p>A scheduler with five entry points. All execute on the same VM thread — there is no parallelism.</p>
+
+        <div class="signature">task.<span class="name">spawn</span>(<span class="arg">fn</span>: <span class="ret">function</span>) <span class="ret">→ ()</span>
+task.<span class="name">defer</span>(<span class="arg">fn</span>: <span class="ret">function</span>) <span class="ret">→ ()</span>
+task.<span class="name">delay</span>(<span class="arg">seconds</span>: <span class="ret">number</span>, <span class="arg">fn</span>: <span class="ret">function</span>) <span class="ret">→ ()</span>
+task.<span class="name">wait</span>(<span class="arg">seconds</span>: <span class="ret">number</span>?) <span class="ret">→ number</span>
+task.<span class="name">tick</span>() <span class="ret">→ number</span></div>
+
+        <p><code>task.spawn</code> calls the function synchronously. <code>task.defer</code> queues it for the end of the current tick. <code>task.delay</code> queues it after a given duration. Errors thrown by deferred or delayed callbacks surface in the console with a full traceback.</p>
+
+        <h3>loadstring(src, chunkname?)</h3>
+        <p>Compiles a Luau source string and returns a callable function. On compile error returns <code>nil, err</code>.</p>
+
+        <div class="signature"><span class="name">loadstring</span>(<span class="arg">src</span>: <span class="ret">string</span>, <span class="arg">chunkname</span>: <span class="ret">string</span>?) <span class="ret">→ function | (nil, string)</span></div>
+
+        <h2 id="input">Input probing</h2>
+
+        <h3>iskeydown(vk)</h3>
+        <p>Returns <code>true</code> if the given virtual key is currently down. Uses <code>GetAsyncKeyState</code> — no event filtering, no double-press detection.</p>
+
+        <div class="signature"><span class="name">iskeydown</span>(<span class="arg">vk</span>: <span class="ret">number</span>) <span class="ret">→ boolean</span></div>
+
+        <h3>ismousedown(button?)</h3>
+        <p>Same, for mouse buttons. <code>1</code> = left, <code>2</code> = right, <code>3</code> = middle. Defaults to left.</p>
+
+        <h3>getmousepos()</h3>
+        <p>Returns the cursor's screen position in pixels.</p>
+
+        <div class="signature"><span class="name">getmousepos</span>() <span class="ret">→ number, number</span></div>
+
+        <h2 id="display">Display</h2>
+
+        <h3 id="viewport-size">viewport_size()</h3>
+        <p>Width and height of the host's render target, in pixels. Updates on resize without re-querying.</p>
+
+        <div class="signature"><span class="name">viewport_size</span>() <span class="ret">→ number, number</span></div>
+
+        <h3 id="world-to-screen">world_to_screen(v)</h3>
+        <p>Projects a world-space <code>Vector3</code> into screen pixel coordinates using the host's cached view matrix.</p>
+
+        <div class="signature"><span class="name">world_to_screen</span>(<span class="arg">point</span>: <span class="ret">Vector3</span>) <span class="ret">→ number, number, boolean</span></div>
+
+        <p>Returns three values: <code>x</code>, <code>y</code>, and a boolean indicating whether the point is in front of the camera and within the viewport. When the boolean is <code>false</code>, the coordinates are <code>-1, -1</code>.</p>
+
+        <h2 id="introspection">Introspection</h2>
+
+        <h3>typeof(v)</h3>
+        <p>Returns the type name of <code>v</code> as a string. Knows about all the built-in types — <code>"Vector3"</code>, <code>"CFrame"</code>, <code>"Instance"</code>, etc. Falls back to Lua's <code>type</code> for primitives.</p>
+
+        <div class="signature"><span class="name">typeof</span>(<span class="arg">value</span>: <span class="ret">any</span>) <span class="ret">→ string</span></div>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="index.html">
+                <span class="label">← Previous</span>
+                <span class="title">API index</span>
+            </a>
+            <a class="foot-link next" href="types.html">
+                <span class="label">Next →</span>
+                <span class="title">Types</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#io">I/O</a></li>
+            <li class="indent"><a href="#print">print</a></li>
+            <li class="indent"><a href="#clipboard">setclipboard</a></li>
+            <li><a href="#time">Time and tasks</a></li>
+            <li class="indent"><a href="#tick">tick</a></li>
+            <li class="indent"><a href="#task">task</a></li>
+            <li><a href="#input">Input probing</a></li>
+            <li><a href="#display">Display</a></li>
+            <li class="indent"><a href="#viewport-size">viewport_size</a></li>
+            <li class="indent"><a href="#world-to-screen">world_to_screen</a></li>
+            <li><a href="#introspection">Introspection</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

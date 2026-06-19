@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quickstart · neko</title>
+<link rel="icon" type="image/svg+xml" href="../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/docs.css">
+<script>window.__BASE__ = '../';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../index.html">
+            <img class="mark" src="../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="index.html" class="active">Docs</a>
+            <a href="api/index.html">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="index.html">Overview</a>            <a href="quickstart.html" class="active">Quickstart</a>
+            <a href="concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="api/index.html">API index</a>
+            <a href="api/globals.html">Globals</a>
+            <a href="api/types.html">Types</a>
+            <a href="api/instance.html">Instance</a>
+            <a href="api/drawing.html">Drawing</a>
+            <a href="api/gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="index.html">docs</a>
+            <span class="sep">/</span>
+            <span>quickstart</span>
+        </div>
+
+        <h1>Quickstart</h1>
+        <p class="summary">A complete script in one screen. Find a key in the heap, mutate it, draw on the host's frame, exit cleanly.</p>
+
+        <h2 id="hello">A first script</h2>
+        <p>Open the script panel, paste the snippet below, press <kbd>Run</kbd>. This script prints the size of the heap and exits.</p>
+
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="frame-title"><i data-lucide="terminal"></i> hello.lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="line"><span class="ln">1</span><span class="tk-keyword">local</span> tables = <span class="tk-fn">getgc_count</span>(<span class="tk-string">"table"</span>)</span>
+<span class="line"><span class="ln">2</span><span class="tk-keyword">local</span> strings = <span class="tk-fn">getgc_count</span>(<span class="tk-string">"string"</span>)</span>
+<span class="line"><span class="ln">3</span></span>
+<span class="line"><span class="ln">4</span><span class="tk-fn">print</span>(<span class="tk-string">"heap: "</span> .. tables .. <span class="tk-string">" tables, "</span> .. strings .. <span class="tk-string">" strings"</span>)</span></pre>
+        </div>
+
+        <h2 id="patch">Patch a value</h2>
+        <p><code>gctab</code> finds tables that contain a given string key and writes new values into the matching slots.</p>
+
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="frame-title"><i data-lucide="terminal"></i> patch.lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="line"><span class="ln">1</span><span class="tk-keyword">local</span> cache = gctab.<span class="tk-fn">find</span>({ <span class="tk-string">"WalkSpeed"</span>, <span class="tk-string">"JumpHeight"</span> })</span>
+<span class="line"><span class="ln">2</span></span>
+<span class="line"><span class="ln">3</span><span class="tk-keyword">local</span> n = gctab.<span class="tk-fn">set</span>(cache, {</span>
+<span class="line"><span class="ln">4</span>    WalkSpeed  = <span class="tk-number">100</span>,</span>
+<span class="line"><span class="ln">5</span>    JumpHeight = <span class="tk-number">200</span>,</span>
+<span class="line"><span class="ln">6</span>})</span>
+<span class="line"><span class="ln">7</span></span>
+<span class="line"><span class="ln">8</span><span class="tk-fn">print</span>(<span class="tk-string">"patched "</span> .. n .. <span class="tk-string">" slot(s)"</span>)</span></pre>
+        </div>
+
+        <p>Re-running this script after a respawn or rejoin works without re-walking the heap. Call <code>gctab.refresh(cache)</code> to drop stale entries and pick up new tables.</p>
+
+        <h2 id="draw">Draw on the host frame</h2>
+        <p>Create a persistent shape, mutate its properties from a render loop, remove it when you're done.</p>
+
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="frame-title"><i data-lucide="terminal"></i> crosshair.lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="line"><span class="ln">1</span><span class="tk-keyword">local</span> w, h = <span class="tk-fn">viewport_size</span>()</span>
+<span class="line"><span class="ln">2</span><span class="tk-keyword">local</span> cx, cy = w * <span class="tk-number">0.5</span>, h * <span class="tk-number">0.5</span></span>
+<span class="line"><span class="ln">3</span></span>
+<span class="line"><span class="ln">4</span><span class="tk-keyword">local</span> dot = Drawing.<span class="tk-fn">new</span>(<span class="tk-string">"Circle"</span>)</span>
+<span class="line"><span class="ln">5</span>dot.Position = Vector2.<span class="tk-fn">new</span>(cx, cy)</span>
+<span class="line"><span class="ln">6</span>dot.Radius   = <span class="tk-number">2</span></span>
+<span class="line"><span class="ln">7</span>dot.Color    = Color3.<span class="tk-fn">fromRGB</span>(<span class="tk-number">232</span>, <span class="tk-number">155</span>, <span class="tk-number">111</span>)</span>
+<span class="line"><span class="ln">8</span>dot.Filled   = <span class="tk-keyword">true</span></span>
+<span class="line"><span class="ln">9</span>dot.Visible  = <span class="tk-keyword">true</span></span></pre>
+        </div>
+
+        <div class="callout">
+            <i data-lucide="info"></i>
+            <div class="body">
+                <div class="title">Drawings persist across script runs</div>
+                <p>Call <code>:Remove()</code> on the handle when you're finished. Otherwise the dot will continue rendering until the runtime exits.</p>
+            </div>
+        </div>
+
+        <h2 id="full">Putting it together</h2>
+        <p>A full example covering all three primitives. Save as <code>aim.lua</code>:</p>
+
+        <div class="code-frame">
+            <div class="frame-bar">
+                <span class="frame-title"><i data-lucide="terminal"></i> aim.lua</span>
+                <button class="copy-btn" aria-label="Copy"><i data-lucide="copy"></i><span class="lab">Copy</span></button>
+            </div>
+<pre class="code"><span class="line"><span class="ln"> 1</span><span class="tk-keyword">local</span> Players = game:<span class="tk-fn">GetService</span>(<span class="tk-string">"Players"</span>)</span>
+<span class="line"><span class="ln"> 2</span><span class="tk-keyword">local</span> Local   = Players.LocalPlayer</span>
+<span class="line"><span class="ln"> 3</span></span>
+<span class="line"><span class="ln"> 4</span><span class="tk-keyword">local</span> reticle = Drawing.<span class="tk-fn">new</span>(<span class="tk-string">"Circle"</span>)</span>
+<span class="line"><span class="ln"> 5</span>reticle.Radius  = <span class="tk-number">3</span></span>
+<span class="line"><span class="ln"> 6</span>reticle.Filled  = <span class="tk-keyword">true</span></span>
+<span class="line"><span class="ln"> 7</span>reticle.Color   = Color3.<span class="tk-fn">fromRGB</span>(<span class="tk-number">232</span>, <span class="tk-number">155</span>, <span class="tk-number">111</span>)</span>
+<span class="line"><span class="ln"> 8</span>reticle.Visible = <span class="tk-keyword">true</span></span>
+<span class="line"><span class="ln"> 9</span></span>
+<span class="line"><span class="ln">10</span><span class="tk-keyword">local</span> <span class="tk-keyword">function</span> <span class="tk-fn">closest</span>()</span>
+<span class="line"><span class="ln">11</span>    <span class="tk-keyword">local</span> mx, my = <span class="tk-fn">getmousepos</span>()</span>
+<span class="line"><span class="ln">12</span>    <span class="tk-keyword">local</span> best, dist = <span class="tk-keyword">nil</span>, <span class="tk-fn">math.huge</span></span>
+<span class="line"><span class="ln">13</span></span>
+<span class="line"><span class="ln">14</span>    <span class="tk-keyword">for</span> _, p <span class="tk-keyword">in</span> <span class="tk-fn">ipairs</span>(Players:<span class="tk-fn">GetPlayers</span>()) <span class="tk-keyword">do</span></span>
+<span class="line"><span class="ln">15</span>        <span class="tk-keyword">if</span> p ~= Local <span class="tk-keyword">and</span> p.Character <span class="tk-keyword">then</span></span>
+<span class="line"><span class="ln">16</span>            <span class="tk-keyword">local</span> hrp = p.Character:<span class="tk-fn">FindFirstChild</span>(<span class="tk-string">"HumanoidRootPart"</span>)</span>
+<span class="line"><span class="ln">17</span>            <span class="tk-keyword">if</span> hrp <span class="tk-keyword">then</span></span>
+<span class="line"><span class="ln">18</span>                <span class="tk-keyword">local</span> sx, sy, on = <span class="tk-fn">world_to_screen</span>(hrp.Position)</span>
+<span class="line"><span class="ln">19</span>                <span class="tk-keyword">if</span> on <span class="tk-keyword">then</span></span>
+<span class="line"><span class="ln">20</span>                    <span class="tk-keyword">local</span> dx, dy = sx - mx, sy - my</span>
+<span class="line"><span class="ln">21</span>                    <span class="tk-keyword">local</span> d = (dx * dx + dy * dy) ^ <span class="tk-number">0.5</span></span>
+<span class="line"><span class="ln">22</span>                    <span class="tk-keyword">if</span> d &lt; dist <span class="tk-keyword">then</span> best, dist = p, d <span class="tk-keyword">end</span></span>
+<span class="line"><span class="ln">23</span>                <span class="tk-keyword">end</span></span>
+<span class="line"><span class="ln">24</span>            <span class="tk-keyword">end</span></span>
+<span class="line"><span class="ln">25</span>        <span class="tk-keyword">end</span></span>
+<span class="line"><span class="ln">26</span>    <span class="tk-keyword">end</span></span>
+<span class="line"><span class="ln">27</span>    <span class="tk-keyword">return</span> best</span>
+<span class="line"><span class="ln">28</span><span class="tk-keyword">end</span></span>
+<span class="line"><span class="ln">29</span></span>
+<span class="line"><span class="ln">30</span><span class="tk-keyword">while</span> <span class="tk-keyword">true</span> <span class="tk-keyword">do</span></span>
+<span class="line"><span class="ln">31</span>    <span class="tk-keyword">local</span> mx, my = <span class="tk-fn">getmousepos</span>()</span>
+<span class="line"><span class="ln">32</span>    reticle.Position = Vector2.<span class="tk-fn">new</span>(mx, my)</span>
+<span class="line"><span class="ln">33</span>    <span class="tk-keyword">local</span> target = <span class="tk-fn">closest</span>()</span>
+<span class="line"><span class="ln">34</span>    reticle.Color = target</span>
+<span class="line"><span class="ln">35</span>        <span class="tk-keyword">and</span> Color3.<span class="tk-fn">fromRGB</span>(<span class="tk-number">232</span>, <span class="tk-number">155</span>, <span class="tk-number">111</span>)</span>
+<span class="line"><span class="ln">36</span>        <span class="tk-keyword">or</span>  Color3.<span class="tk-fn">fromRGB</span>(<span class="tk-number">120</span>, <span class="tk-number">120</span>, <span class="tk-number">120</span>)</span>
+<span class="line"><span class="ln">37</span>    <span class="tk-fn">wait</span>(<span class="tk-number">1</span> / <span class="tk-number">120</span>)</span>
+<span class="line"><span class="ln">38</span><span class="tk-keyword">end</span></span></pre>
+        </div>
+
+        <p class="muted">Paints a small dot under the mouse and tints it amber whenever there's a target visible on screen. Closing the script panel removes the drawing automatically when the runtime tears down.</p>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="index.html">
+                <span class="label">← Previous</span>
+                <span class="title">Overview</span>
+            </a>
+            <a class="foot-link next" href="concepts.html">
+                <span class="label">Next →</span>
+                <span class="title">Architecture</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#hello">A first script</a></li>
+            <li><a href="#patch">Patch a value</a></li>
+            <li><a href="#draw">Draw on the frame</a></li>
+            <li><a href="#full">Putting it together</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

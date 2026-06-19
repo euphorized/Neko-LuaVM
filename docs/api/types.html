@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Types · neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html">API index</a>
+            <a href="globals.html">Globals</a>
+            <a href="types.html" class="active">Types</a>
+            <a href="instance.html">Instance</a>
+            <a href="drawing.html">Drawing</a>
+            <a href="gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <a href="index.html">api</a>
+            <span class="sep">/</span>
+            <span>types</span>
+        </div>
+
+        <h1>Types</h1>
+        <p class="summary">Built-in value types. All immutable, all comparable, all carry a stable <code>typeof</code> name.</p>
+
+        <div class="tag-row">
+            <span class="tag global"><span class="dot"></span>core</span>
+        </div>
+
+        <h2 id="vector3">Vector3</h2>
+        <p>Three-component float vector. Supports arithmetic, dot/cross products, magnitude, unit vector.</p>
+        <div class="signature">Vector3.<span class="name">new</span>(<span class="arg">x</span>: <span class="ret">number</span>, <span class="arg">y</span>: <span class="ret">number</span>, <span class="arg">z</span>: <span class="ret">number</span>) <span class="ret">→ Vector3</span></div>
+
+        <table class="params">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td>X, Y, Z</td><td>number</td><td>Components.</td></tr>
+            <tr><td>Magnitude</td><td>number</td><td>Length of the vector.</td></tr>
+            <tr><td>Unit</td><td>Vector3</td><td>Normalized direction.</td></tr>
+        </table>
+
+        <p>Constants: <code>Vector3.zero</code>, <code>Vector3.one</code>, <code>Vector3.xAxis</code>, <code>Vector3.yAxis</code>, <code>Vector3.zAxis</code>.</p>
+
+        <h2 id="vector2">Vector2</h2>
+        <p>Two-component float vector. Same surface as <code>Vector3</code> minus Z.</p>
+        <div class="signature">Vector2.<span class="name">new</span>(<span class="arg">x</span>: <span class="ret">number</span>, <span class="arg">y</span>: <span class="ret">number</span>) <span class="ret">→ Vector2</span></div>
+
+        <h2 id="cframe">CFrame</h2>
+        <p>3D coordinate frame: position plus orientation matrix. Used for parts, cameras, anything spatial.</p>
+        <div class="signature">CFrame.<span class="name">new</span>() <span class="ret">→ CFrame</span>
+CFrame.<span class="name">new</span>(<span class="arg">x</span>, <span class="arg">y</span>, <span class="arg">z</span>) <span class="ret">→ CFrame</span></div>
+
+        <h2 id="color3">Color3</h2>
+        <p>RGB color in normalized 0-1 floats.</p>
+        <div class="signature">Color3.<span class="name">new</span>(<span class="arg">r</span>, <span class="arg">g</span>, <span class="arg">b</span>) <span class="ret">→ Color3</span>
+Color3.<span class="name">fromRGB</span>(<span class="arg">r</span>, <span class="arg">g</span>, <span class="arg">b</span>) <span class="ret">→ Color3</span></div>
+
+        <h2 id="udim">UDim and UDim2</h2>
+        <p>Scale + offset coordinate types used by GUI sizes.</p>
+        <div class="signature">UDim.<span class="name">new</span>(<span class="arg">scale</span>, <span class="arg">offset</span>) <span class="ret">→ UDim</span>
+UDim2.<span class="name">new</span>(<span class="arg">xScale</span>, <span class="arg">xOffset</span>, <span class="arg">yScale</span>, <span class="arg">yOffset</span>) <span class="ret">→ UDim2</span>
+UDim2.<span class="name">fromOffset</span>(<span class="arg">x</span>, <span class="arg">y</span>) <span class="ret">→ UDim2</span></div>
+
+        <h2 id="numberrange">NumberRange</h2>
+        <p>Closed numeric interval.</p>
+        <div class="signature">NumberRange.<span class="name">new</span>(<span class="arg">min</span>, <span class="arg">max</span>) <span class="ret">→ NumberRange</span></div>
+
+        <h2 id="rect">Rect</h2>
+        <p>Axis-aligned rectangle in screen space.</p>
+        <div class="signature">Rect.<span class="name">new</span>(<span class="arg">minX</span>, <span class="arg">minY</span>, <span class="arg">maxX</span>, <span class="arg">maxY</span>) <span class="ret">→ Rect</span></div>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="globals.html">
+                <span class="label">← Previous</span>
+                <span class="title">Globals</span>
+            </a>
+            <a class="foot-link next" href="instance.html">
+                <span class="label">Next →</span>
+                <span class="title">Instance</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#vector3">Vector3</a></li>
+            <li><a href="#vector2">Vector2</a></li>
+            <li><a href="#cframe">CFrame</a></li>
+            <li><a href="#color3">Color3</a></li>
+            <li><a href="#udim">UDim and UDim2</a></li>
+            <li><a href="#numberrange">NumberRange</a></li>
+            <li><a href="#rect">Rect</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>

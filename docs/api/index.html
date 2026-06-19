@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Reference — neko</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/img/logo.svg">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/docs.css">
+<script>window.__BASE__ = '../../';</script>
+<script src="../../assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="site">
+    <div class="container row">
+        <a class="brand" href="../../index.html">
+            <img class="mark" src="../../assets/img/logo.svg" alt="">
+            <span>neko</span>
+            <span class="ver">v1.1</span>
+        </a>
+        <nav class="top">
+            <a href="../index.html">Docs</a>
+            <a href="index.html" class="active">API</a>            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        </nav>    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="sidenav">
+        <div class="group">
+            <span class="group-title">Introduction</span>
+            <a href="../index.html">Overview</a>            <a href="../quickstart.html">Quickstart</a>
+            <a href="../concepts.html">Architecture</a>
+        </div>
+        <div class="group">
+            <span class="group-title">Reference</span>
+            <a href="index.html" class="active">API index</a>
+            <a href="globals.html">Globals</a>
+            <a href="types.html">Types</a>
+            <a href="instance.html">Instance</a>
+            <a href="drawing.html">Drawing</a>
+            <a href="gctab.html">gctab</a>
+        </div>    </aside>
+
+    <main class="docs-main">
+        <div class="breadcrumb">
+            <a href="../../index.html">neko</a>
+            <span class="sep">/</span>
+            <a href="../index.html">docs</a>
+            <span class="sep">/</span>
+            <span>api</span>
+        </div>
+
+        <h1>API reference</h1>
+        <p class="summary">A complete listing of every global, library, and type exposed to scripts running on the VM.</p>
+
+        <div class="tag-row">
+            <span class="tag global"><span class="dot"></span>global</span>
+            <span class="tag module"><span class="dot"></span>module</span>
+            <span class="tag unstable"><span class="dot"></span>unstable</span>
+            <span class="tag internal"><span class="dot"></span>internal</span>
+        </div>
+
+        <h2 id="modules">Modules</h2>
+
+        <div class="api-list">
+            <a href="globals.html">
+                <code>globals</code>
+                <span class="desc">Print, warn, typeof, tick, task scheduler, clipboard, world-to-screen.</span>
+                <span class="kind-tag">core</span>
+            </a>
+            <a href="types.html">
+                <code>types</code>
+                <span class="desc">Vector3, Vector2, CFrame, Color3, UDim, UDim2, NumberRange, Rect.</span>
+                <span class="kind-tag">core</span>
+            </a>
+            <a href="instance.html">
+                <code>Instance</code>
+                <span class="desc">Live tree access. FindFirstChild, GetChildren, GetService, IsA.</span>
+                <span class="kind-tag">module</span>
+            </a>
+            <a href="drawing.html">
+                <code>Drawing</code>
+                <span class="desc">Persistent shapes drawn on the host swap chain.</span>
+                <span class="kind-tag">module</span>
+            </a>
+            <a href="gctab.html">
+                <code>gctab</code>
+                <span class="desc">Find live tables by key name. Mutate value slots in place.</span>
+                <span class="kind-tag">module</span>
+            </a>
+        </div>
+
+        <h2 id="conventions">Conventions</h2>
+        <p>Every function in this reference is documented with the same shape: a one-line summary, a signature, a parameter table, the return value, and at least one runnable example.</p>
+
+        <p>Where a function is also reachable as a method on an object, both forms are noted.</p>
+
+        <h2 id="search">Searching</h2>
+        <p>Press <kbd>⌘K</kbd> (or <kbd>Ctrl+K</kbd> on Windows) to open the command palette. It indexes every page, every reference, and every public function — including subpaths like <code>gctab.find</code> and <code>Drawing.new</code>.</p>
+
+        <div class="docs-foot">
+            <a class="foot-link" href="../concepts.html">
+                <span class="label">← Previous</span>
+                <span class="title">Architecture</span>
+            </a>
+            <a class="foot-link next" href="globals.html">
+                <span class="label">Next →</span>
+                <span class="title">Globals</span>
+            </a>
+        </div>
+    </main>
+
+    <aside class="toc">
+        <div class="label">On this page</div>
+        <ul>
+            <li><a href="#modules">Modules</a></li>
+            <li><a href="#conventions">Conventions</a></li>
+            <li><a href="#search">Searching</a></li>
+        </ul>
+    </aside>
+</div>
+
+</body>
+</html>
